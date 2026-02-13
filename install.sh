@@ -383,8 +383,24 @@ else
   info "yazi ya instalado — omitiendo."
 fi
 
+# ── opencode (AI coding assistant) ─────────────────────────────────────────
+if ! command -v opencode &>/dev/null; then
+  if command -v npm &>/dev/null; then
+    info "Instalando OpenCode (AI coding assistant)..."
+    if npm install -g opencode-ai; then
+      info "OpenCode $(opencode --version 2>&1 | head -1) instalado."
+    else
+      fail "Error instalando OpenCode. Continuando..."
+    fi
+  else
+    warn "npm no disponible — no se puede instalar OpenCode. Instala Node.js primero."
+  fi
+else
+  info "OpenCode ya instalado — omitiendo."
+fi
+
 # ══════════════════════════════════════════════════════════════════════════════
-# 14) Mensaje final
+# 15) Mensaje final
 # ══════════════════════════════════════════════════════════════════════════════
 echo ""
 echo -e "${GREEN}Todo listo. Cierra y vuelve a abrir la terminal.${NC}"
@@ -403,7 +419,7 @@ if [[ -f "$HOME/.gitconfig-trabajo" ]]; then
   echo ""
 fi
 echo -e "${GREEN}Verificando herramientas instaladas:${NC}"
-for cmd in eza bat fd xh dust rg fzf zoxide atuin lazygit yazi fastfetch duf btop tldr jq rustc fnm node uv; do
+for cmd in eza bat fd xh dust rg fzf zoxide atuin lazygit yazi fastfetch duf btop tldr jq rustc fnm node uv opencode; do
   printf "    %-12s" "$cmd"
   if command -v "$cmd" &>/dev/null; then
     echo -e "${GREEN}✅${NC} $($cmd --version 2>&1 | head -1)"

@@ -65,6 +65,7 @@ El script es **idempotente** — puedes re-ejecutarlo sin romper nada.
 | [rustup](https://rustup.rs/) | Toolchain de Rust/Cargo | Script oficial | [rust-lang/rustup](https://github.com/rust-lang/rustup) |
 | [fnm](https://github.com/Schniz/fnm) | Node.js version manager (reemplaza nvm) | Script oficial + LTS auto | [Schniz/fnm](https://github.com/Schniz/fnm) |
 | [uv](https://docs.astral.sh/uv/) | Gestor de Python ultra-rápido (por Astral) | Script oficial | [astral-sh/uv](https://github.com/astral-sh/uv) |
+| [opencode](https://opencode.ai/) | Agente de codificación IA en terminal | npm global | [anomalyco/opencode](https://github.com/anomalyco/opencode) |
 
 > **fnm** soporta `.node-version` y `.nvmrc` automáticamente gracias al flag `--use-on-cd` configurado en `.zshrc`.
 
@@ -96,7 +97,7 @@ y       → wrapper que cambia al directorio al salir
 Ejecuta este one-liner para comprobar que todas las herramientas están disponibles:
 
 ```bash
-for cmd in git zsh stow eza bat fd xh dust rg fzf zoxide atuin lazygit yazi fastfetch duf btop tldr jq rustc fnm node uv python3; do
+for cmd in git zsh stow eza bat fd xh dust rg fzf zoxide atuin lazygit yazi fastfetch duf btop tldr jq rustc fnm node uv python3 opencode; do
   printf "%-12s" "$cmd"; command -v $cmd &>/dev/null && echo "✅ ($($cmd --version 2>&1 | head -1))" || echo "❌ no encontrado"
 done
 ```
