@@ -1,3 +1,9 @@
+# ── Fastfetch (solo la primera terminal de la sesión) ─────────────────────────
+if [ ! -f /tmp/fastfetch_session_lock ]; then
+    fastfetch
+    touch /tmp/fastfetch_session_lock
+fi
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -110,5 +116,96 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+alias gtcode='env GIT_EDITOR="code --wait" git commit'
+alias gtantig='env GIT_EDITOR="antigravity --wait" git commit'
+
+
+antig() {
+    # Detecta si estás en WSL
+    if [ -n "$WSL_DISTRO_NAME" ]; then
+        # Construye la URI usando la variable de entorno de la distro actual
+        antigravity --remote "wsl+${WSL_DISTRO_NAME}" $(pwd)
+    else
+        # Si estás en Windows normal, usa el comportamiento estandar
+        antigravity "$@"
+    fi
+}
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# --- MODERN CLI TOOLS ---
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# PATH — herramientas locales, Cargo, fnm y Atuin
+export PATH="$HOME/.local/share/fnm:$HOME/.local/bin:$HOME/.cargo/bin:$HOME/.atuin/bin:$PATH"
+
+# ── fnm (Fast Node Manager — use-on-cd para .node-version/.nvmrc) ───────────
+if command -v fnm &>/dev/null; then
+  eval "$(fnm env --use-on-cd --shell zsh)"
+fi
+
+# ── Zoxide (smart cd) ─────────────────────────────────────────────────────────
+if command -v zoxide &>/dev/null; then
+  eval "$(zoxide init zsh)"
+  alias cd='z'
+fi
+
+# ── Atuin (shell history sync) ────────────────────────────────────────────────
+if command -v atuin &>/dev/null; then
+  eval "$(atuin init zsh)"
+fi
+
+# ── fzf (fuzzy finder) ────────────────────────────────────────────────────────
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Usar fd como backend (respeta .gitignore)
+if command -v fd &>/dev/null; then
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+  export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+fi
+
+# Previsualización con bat en Ctrl+T
+if command -v bat &>/dev/null; then
+  export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+fi
+
+# ── eza (ls moderno) ──────────────────────────────────────────────────────────
+if command -v eza &>/dev/null; then
+  alias ls='eza --icons --group-directories-first'
+  alias ll='eza -la --icons --git --group-directories-first'
+  alias tree='eza --tree --icons --git --group-directories-first'
+fi
+
+# ── bat (cat moderno) ─────────────────────────────────────────────────────────
+if command -v bat &>/dev/null; then
+  alias cat='bat --paging=never'
+fi
+
+# ── rsync seguro (copia con progreso) ─────────────────────────────────────────
+alias cpg="rsync -ah --progress"
+
+# ── Yazi (file manager — wrapper para cambiar de directorio al salir) ─────────
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# --- END MODERN CLI TOOLS ---
+# ═══════════════════════════════════════════════════════════════════════════════
+
+. "$HOME/.atuin/bin/env"
+
+# ── uv (Python — autocompletado) ───────────────────────────────────────────────
+if command -v uv &>/dev/null; then
+  eval "$(uv generate-shell-completion zsh)"
+  eval "$(uvx --generate-shell-completion zsh)"
+fi
