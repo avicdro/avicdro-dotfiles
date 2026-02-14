@@ -90,6 +90,17 @@ cd      → z  (alias, aprende de tu uso)
 y       → wrapper que cambia al directorio al salir
 ```
 
+## OpenCode — Asistente de Terminal Lite ⚡
+
+Integración con [OpenCode](https://opencode.ai/) usando el modelo **GPT-5 Nano** (gratuito y ultra-rápido) para consultas de terminal sin salir de Zsh.
+
+| Atajo | Qué hace | Ejemplo |
+|-------|----------|---------|
+| `?? <duda>` | Devuelve solo el comando limpio | `?? listar archivos pdf` |
+| `explain <comando>` | Explicación breve + código | `explain tar -xzvf` |
+
+> El bloque solo se carga si `opencode` está instalado. Modelo configurable vía `$OPENCODE_FAST_MODEL`.
+
 > **Fastfetch** se ejecuta automáticamente al abrir la primera terminal de la sesión (usa un lock file en `/tmp` que se resetea al reiniciar WSL).
 
 ## Verificar instalación

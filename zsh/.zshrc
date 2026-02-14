@@ -202,6 +202,32 @@ function y() {
 # --- END MODERN CLI TOOLS ---
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# --- OpenCode Lite (Modo Flash/Nano ⚡) ---
+# ═══════════════════════════════════════════════════════════════════════════════
+if command -v opencode &>/dev/null; then
+  # Modelo gratuito/rápido para consultas de terminal
+  export OPENCODE_FAST_MODEL="opencode/gpt-5-nano"
+
+  # ── Pregunta rápida (Explicación breve + Código) ──────────────────────────
+  function ask() {
+    opencode run --model "$OPENCODE_FAST_MODEL" "$*"
+  }
+
+  # ── Solo el comando (Ideal para copiar/pegar) ────────────────────────────
+  function cmd() {
+    opencode run --model "$OPENCODE_FAST_MODEL" \
+      "Responde SOLO con el comando de shell (sin markdown, sin explicaciones, sin comillas) para: $*"
+  }
+
+  # ── Aliases y atajos ──────────────────────────────────────────────────────
+  alias '??'="cmd"      # Uso: ?? listar archivos pdf
+  alias explain="ask"   # Uso: explain tar -xzvf
+fi
+# ═══════════════════════════════════════════════════════════════════════════════
+# --- END OpenCode Lite ---
+# ═══════════════════════════════════════════════════════════════════════════════
+
 . "$HOME/.atuin/bin/env"
 
 # ── uv (Python — autocompletado) ───────────────────────────────────────────────
