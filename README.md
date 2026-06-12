@@ -46,6 +46,7 @@ El script es **idempotente** — puedes re-ejecutarlo sin romper nada.
 | [fd](https://github.com/sharkdp/fd) | Rust | ~4 MB | Búsqueda rápida archivos | [sharkdp/fd](https://github.com/sharkdp/fd) |
 | [xh](https://github.com/ducaale/xh) | Rust | ~7 MB | Cliente HTTP moderno | [ducaale/xh](https://github.com/ducaale/xh) |
 | [dust](https://github.com/bootandy/dust) | Rust | ~3 MB | Analizador uso disco | [bootandy/dust](https://github.com/bootandy/dust) |
+| [delta](https://github.com/dandavison/delta) | Rust | ~7 MB | Pager visual para diffs Git | [dandavison/delta](https://github.com/dandavison/delta) |
 | [ripgrep](https://github.com/BurntSushi/ripgrep) | Rust | ~5 MB | Búsqueda recursiva código | [BurntSushi/ripgrep](https://github.com/BurntSushi/ripgrep) |
 | [fzf](https://github.com/junegunn/fzf) | Go | ~3 MB | Fuzzy finder universal | [junegunn/fzf](https://github.com/junegunn/fzf) |
 | [zoxide](https://github.com/ajeetdsouza/zoxide) | Rust | ~1 MB | Navegación inteligente directorios | [ajeetdsouza/zoxide](https://github.com/ajeetdsouza/zoxide) |
@@ -71,7 +72,19 @@ El script es **idempotente** — puedes re-ejecutarlo sin romper nada.
 
 ## Aliases configurados
 
+Los aliases se definen en módulos dentro de `zsh/.zsh/` y complementan los que provee el plugin `git` de Oh My Zsh.
+
 ```bash
+# Git (extras sobre OMZ)
+gst-short → git status --short --branch
+glg       → git log --graph --pretty (visual)
+gundo     → git reset --soft HEAD~1
+gamend    → git commit --amend --no-edit
+gbranches → git branch -a --sort=-committerdate
+gstash-all→ git stash push --include-untracked
+gtcode    → commit con VS Code como editor
+gtantig   → commit con Antigravity como editor
+
 # eza (ls moderno)
 ls      → eza --icons --group-directories-first
 ll      → eza -la --icons --git --group-directories-first
@@ -90,6 +103,10 @@ cd      → z  (alias, aprende de tu uso)
 y       → wrapper que cambia al directorio al salir
 ```
 
+### Delta
+
+**Delta** se usa **exclusivamente en lazygit** (no como pager global de Git). Esto mantiene la salida nativa de `git diff/log/show` en terminal, lo que es mejor para scripts y agentes IA que no manejan bien la salida ANSI de delta. Se configura en `lazygit/.config/lazygit/config.yml`.
+
 ## OpenCode — Asistente de Terminal Lite ⚡
 
 Integración con [OpenCode](https://opencode.ai/) usando el modelo **GPT-5 Nano** (gratuito y ultra-rápido) para consultas de terminal sin salir de Zsh.
@@ -101,14 +118,18 @@ Integración con [OpenCode](https://opencode.ai/) usando el modelo **GPT-5 Nano*
 
 > El bloque solo se carga si `opencode` está instalado. Modelo configurable vía `$OPENCODE_FAST_MODEL`.
 
-> **Fastfetch** se ejecuta automáticamente al abrir la primera terminal de la sesión (usa un lock file en `/tmp` que se resetea al reiniciar WSL).
+> **Fastfetch** se ejecuta automáticamente al abrir la primera terminal de la sesión (usa un lock file en `/run/user/<uid>/fastfetch_session_lock`, que se recrea al iniciar una nueva sesión).
+
+Su configuración queda versionada en `fastfetch/.config/fastfetch/config.jsonc` y se enlaza a `~/.config/fastfetch/config.jsonc` mediante GNU Stow durante la instalación.
+
+También se versionan en paquetes separados de Stow las configuraciones base de `git`, `lazygit`, `yazi`, `atuin`, `btop`, `bat` y `~/.local/bin`.
 
 ## Verificar instalación
 
 Ejecuta este one-liner para comprobar que todas las herramientas están disponibles:
 
 ```bash
-for cmd in git zsh stow eza bat fd xh dust rg fzf zoxide atuin lazygit yazi fastfetch duf btop tldr jq rustc fnm node uv python3 opencode; do
+for cmd in git zsh stow eza bat fd xh dust delta rg fzf zoxide atuin lazygit yazi fastfetch duf btop tldr jq rustc fnm node uv python3 opencode; do
   printf "%-12s" "$cmd"; command -v $cmd &>/dev/null && echo "✅ ($($cmd --version 2>&1 | head -1))" || echo "❌ no encontrado"
 done
 ```
@@ -123,15 +144,41 @@ done
 
 ```
 dotfiles/
-├── install.sh          # Script de instalación principal
+├── .stow-global-ignore   # Patrones que Stow ignora globalmente
+├── install.sh             # Script de instalación principal
 ├── README.md
+├── scripts/
+│   └── audit-dotfiles.sh  # Auditoría de salud de los dotfiles
+├── atuin/
+│   └── .config/atuin/config.toml
+├── bat/
+│   └── .config/bat/config
+├── bin/
+│   └── .local/bin/.keep
+├── btop/
+│   └── .config/btop/btop.conf
+├── fastfetch/
+│   └── .config/fastfetch/config.jsonc
+├── git/
+│   ├── .gitattributes_global
+│   ├── .gitconfig
+│   └── .gitignore_global
+├── lazygit/
+│   └── .config/lazygit/config.yml   # Delta + tema Atom dark
+├── yazi/
+│   └── .config/yazi/yazi.toml
 └── zsh/
-    └── .zshrc          # Configuración de Zsh (enlazado con Stow a ~/.zshrc)
+    ├── .p10k.zsh
+    ├── .zshrc              # Orquestador (carga módulos)
+    └── .zsh/
+        ├── aliases.zsh     # Aliases (git extras, eza, bat, etc.)
+        ├── functions.zsh   # Funciones (antig, yazi wrapper)
+        └── tools.zsh       # Herramientas CLI (fnm, zoxide, fzf, atuin, uv, opencode)
 ```
 
 ## Git — Perfiles condicionales
 
-El script configura automáticamente **dos identidades Git** según la ruta del repositorio:
+La configuración global de Git ahora se versiona en `git/.gitconfig` y mantiene **dos identidades Git** separadas según ruta:
 
 | Ruta | Identidad |
 |------|-----------|
@@ -140,6 +187,8 @@ El script configura automáticamente **dos identidades Git** según la ruta del 
 
 Si ya existe `~/.gitconfig-trabajo`, el script lo detecta y no vuelve a preguntar. Para modificarlo, edita ese archivo directamente.
 
+Antes de enlazar con Stow, `install.sh` hace backup automático de archivos locales existentes en `~/.dotfiles-backups/` con sufijo `.pre-stow.bak.<timestamp>`.
+
 ## Re-ejecutar
 
 El script verifica cada herramienta con `command -v` antes de instalar. Si algo ya existe, lo omite. Es seguro ejecutar múltiples veces:
@@ -147,6 +196,27 @@ El script verifica cada herramienta con `command -v` antes de instalar. Si algo 
 ```bash
 bash ~/dotfiles/install.sh
 ```
+
+## Auditoria rapida
+
+Para revisar sintaxis, simulacion de Stow, symlinks esperados y estado git:
+
+```bash
+bash ~/dotfiles/scripts/audit-dotfiles.sh
+```
+
+Para ver salida detallada de la simulacion de Stow:
+
+```bash
+bash ~/dotfiles/scripts/audit-dotfiles.sh --verbose
+```
+
+El script devuelve:
+
+- `0` si todo lo critico pasa
+- `1` si detecta fallos (por ejemplo symlink roto o conflicto de Stow)
+
+Los warnings no rompen la ejecucion, pero se reportan en el resumen.
 
 ## Requisitos previos
 

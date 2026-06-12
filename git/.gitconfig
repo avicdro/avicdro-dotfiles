@@ -1,0 +1,28 @@
+# Configuración global versionada en dotfiles (GNU Stow)
+# Identidades sensibles separadas en ~/.gitconfig-personal y ~/.gitconfig-trabajo
+
+[includeIf "gitdir:~/code/personal/"]
+    path = ~/.gitconfig-personal
+
+[includeIf "gitdir:~/code/trabajo/"]
+    path = ~/.gitconfig-trabajo
+
+[core]
+    excludesfile = ~/.gitignore_global
+    attributesfile = ~/.gitattributes_global
+    autocrlf = input
+
+[init]
+    defaultBranch = main
+
+[push]
+    autoSetupRemote = true
+
+[fetch]
+    prune = true
+
+[merge]
+    conflictstyle = zdiff3
+
+[diff]
+    colorMoved = default

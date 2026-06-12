@@ -1,0 +1,12 @@
+# Global ignores
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# OS / temp files
+*.swp
+*.swo
+*~

@@ -1,0 +1,28 @@
+# Configuracion de Atuin (gestionada con GNU Stow)
+
+# ── Búsqueda ──────────────────────────────────────────────────────────────────
+# Modo de búsqueda: prefix | fulltext | fuzzy | skim
+search_mode = "fuzzy"
+
+# Modo de filtro: global | host | session | directory
+filter_mode = "global"
+
+# Filtro al usar la flecha arriba (solo directorio actual es más intuitivo)
+filter_mode_shell_up_key_binding = "directory"
+
+# ── Estilo ────────────────────────────────────────────────────────────────────
+# Estilo de la UI: auto | full | compact
+style = "compact"
+
+# Mostrar preview del comando completo
+show_preview = true
+
+# Invertir orden (más reciente arriba)
+invert = false
+
+# ── Historial ─────────────────────────────────────────────────────────────────
+# No registrar comandos que empiezan con espacio
+secrets_filter = true
+
+# Mantener historial de sesiones de shell cuando se cierra
+store_failed = true

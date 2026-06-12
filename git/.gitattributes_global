@@ -1,0 +1,37 @@
+# Gitattributes global — normalización de finales de línea
+# Referenciado desde ~/.gitconfig (core.attributesfile)
+
+# Auto-detectar texto y normalizar a LF en el repo
+* text=auto
+
+# Forzar LF para archivos de código
+*.sh    text eol=lf
+*.zsh   text eol=lf
+*.bash  text eol=lf
+*.py    text eol=lf
+*.js    text eol=lf
+*.ts    text eol=lf
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.toml  text eol=lf
+*.md    text eol=lf
+*.css   text eol=lf
+*.html  text eol=lf
+*.rs    text eol=lf
+
+# Binarios — no tratar como texto
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.pdf   binary
+*.zip   binary
+*.tar.gz binary
+*.onnx  binary

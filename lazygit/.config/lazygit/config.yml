@@ -1,0 +1,39 @@
+# Configuracion de LazyGit (gestionada con GNU Stow)
+
+# ── Delta como pager de diffs ─────────────────────────────────────────────────
+# Delta se usa SOLO aqui (no en gitconfig global) para no afectar
+# la salida de git en terminal/scripts/agentes IA.
+git:
+  pagers:
+    - colorArg: always
+      pager: delta --dark --paging=never --syntax-theme=gruvbox-dark --side-by-side --line-numbers --hyperlinks
+# ── Tema: Gruvbox Dark ─────────────────────────────────────────────────────────
+gui:
+  nerdFontsVersion: "3"
+  showBottomLine: false
+  showPanelJumps: false
+  theme:
+    activeBorderColor:
+      - "#fabd2f"     # gruvbox yellow
+      - bold
+    inactiveBorderColor:
+      - "#665c54"     # gruvbox bg3
+    searchingActiveBorderColor:
+      - "#fe8019"     # gruvbox orange
+      - bold
+    optionsTextColor:
+      - "#83a598"     # gruvbox blue
+    selectedLineBgColor:
+      - "#3c3836"     # gruvbox bg1
+    cherryPickedCommitFgColor:
+      - "#fabd2f"     # gruvbox yellow
+    cherryPickedCommitBgColor:
+      - "#3c3836"     # gruvbox bg1
+    markedBaseCommitFgColor:
+      - "#fabd2f"
+    markedBaseCommitBgColor:
+      - "#3c3836"
+    unstagedChangesColor:
+      - "#fb4934"     # gruvbox red
+    defaultFgColor:
+      - "#ebdbb2"     # gruvbox fg

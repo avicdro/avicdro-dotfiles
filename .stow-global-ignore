@@ -1,0 +1,27 @@
+# GNU Stow global ignore
+# Patrones que Stow nunca debe intentar enlazar
+
+# Control de versiones
+\.git
+\.gitignore
+\.gitmodules
+
+# Documentación del repo
+^/README.*
+^/LICENSE.*
+^/CHANGELOG.*
+
+# Scripts y herramientas del repo
+^/install\.sh
+^/scripts
+
+# Archivos del editor
+\.swp
+\.swo
+*~
+\.vscode
+\.idea
+
+# OS
+\.DS_Store
+Thumbs\.db

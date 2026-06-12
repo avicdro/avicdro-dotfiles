@@ -11,14 +11,32 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-info()  { echo -e "${GREEN}▶ $*${NC}"; }
-warn()  { echo -e "${YELLOW}⚠ $*${NC}"; }
-fail()  { echo -e "${RED}✖ $*${NC}"; }
+info() { echo -e "${GREEN}▶ $*${NC}"; }
+warn() { echo -e "${YELLOW}⚠ $*${NC}"; }
+fail() { echo -e "${RED}✖ $*${NC}"; }
+
+# ── Helper: respalda archivo local antes de reemplazarlo por symlink de Stow ──
+backup_local_file_if_needed() {
+  local target="$1"
+  local timestamp backup_root relative backup_name backup
+  if [[ -f "$target" && ! -L "$target" ]]; then
+    timestamp="$(date +%Y%m%d%H%M%S)"
+    backup_root="$HOME/.dotfiles-backups"
+    mkdir -p "$backup_root"
+    relative="${target#$HOME/}"
+    backup_name="${relative//\//__}.pre-stow.bak.${timestamp}"
+    backup="${backup_root}/${backup_name}"
+    cp "$target" "$backup"
+    rm -f "$target"
+    info "Backup creado: $backup"
+  fi
+}
 
 # ── Helper: instalar herramienta con Cargo ────────────────────────────────────
 cargo_install() {
-  local bin="$1"; shift   # nombre del binario a verificar
-  local crates=("$@")     # uno o más crates a instalar
+  local bin="$1"
+  shift               # nombre del binario a verificar
+  local crates=("$@") # uno o más crates a instalar
   if command -v "$bin" &>/dev/null; then
     info "$bin ya está instalado — omitiendo."
   else
@@ -44,9 +62,18 @@ LOCAL_BIN="$HOME/.local/bin"
 
 # Detectar arquitectura del sistema
 case "$(uname -m)" in
-  x86_64)  ARCH="x86_64" ; ARCH_ALT="amd64" ;;
-  aarch64) ARCH="aarch64"; ARCH_ALT="arm64" ;;
-  *)       fail "Arquitectura $(uname -m) no soportada."; exit 1 ;;
+x86_64)
+  ARCH="x86_64"
+  ARCH_ALT="amd64"
+  ;;
+aarch64)
+  ARCH="aarch64"
+  ARCH_ALT="arm64"
+  ;;
+*)
+  fail "Arquitectura $(uname -m) no soportada."
+  exit 1
+  ;;
 esac
 
 mkdir -p "$LOCAL_BIN"
@@ -65,15 +92,15 @@ if ! command -v fastfetch &>/dev/null; then
     sudo apt install -y fastfetch
   else
     info "fastfetch no disponible en apt — descargando .deb de GitHub..."
-    FF_VERSION=$(curl -s "https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest" \
-      | jq -r '.tag_name')
+    FF_VERSION=$(curl -s "https://api.github.com/repos/fastfetch-cli/fastfetch/releases/latest" |
+      jq -r '.tag_name')
     if [[ -n "$FF_VERSION" && "$FF_VERSION" != "null" ]]; then
       FF_DEB="fastfetch-linux-${ARCH_ALT}.deb"
       FF_URL="https://github.com/fastfetch-cli/fastfetch/releases/download/${FF_VERSION}/${FF_DEB}"
       TMP_DEB=$(mktemp)
       if curl -Lo "$TMP_DEB" "$FF_URL"; then
         sudo dpkg -i "$TMP_DEB"
-        sudo apt install -f -y   # resolver dependencias si faltan
+        sudo apt install -f -y # resolver dependencias si faltan
         info "fastfetch ${FF_VERSION} instalado."
       else
         fail "Error descargando fastfetch .deb. Continuando..."
@@ -139,7 +166,7 @@ else
   read -rp "    Nombre de usuario (ej: tuUsuario): " PERSONAL_NAME
   read -rp "    Email personal   (ej: tu@email.com): " PERSONAL_EMAIL
   if [[ -n "$PERSONAL_NAME" && -n "$PERSONAL_EMAIL" ]]; then
-    cat > "$HOME/.gitconfig-personal" <<EOF
+    cat >"$HOME/.gitconfig-personal" <<EOF
 [user]
     name  = ${PERSONAL_NAME}
     email = ${PERSONAL_EMAIL}
@@ -161,7 +188,7 @@ else
     read -rp "    Nombre (ej: nombre.apellido): " TRABAJO_NAME
     read -rp "    Email  (ej: nombre@empresa.com): " TRABAJO_EMAIL
     if [[ -n "$TRABAJO_NAME" && -n "$TRABAJO_EMAIL" ]]; then
-      cat > "$HOME/.gitconfig-trabajo" <<EOF
+      cat >"$HOME/.gitconfig-trabajo" <<EOF
 [user]
     name  = ${TRABAJO_NAME}
     email = ${TRABAJO_EMAIL}
@@ -175,22 +202,27 @@ EOF
   fi
 fi
 
-# 5‑c) Incluir perfiles según la ruta del repo (idempotente)
-git config --global includeIf.gitdir:"$HOME/code/personal/".path "$HOME/.gitconfig-personal"
-if [[ -f "$HOME/.gitconfig-trabajo" ]]; then
-  git config --global includeIf.gitdir:"$HOME/code/trabajo/".path "$HOME/.gitconfig-trabajo"
-fi
-# Editor: usa VS Code si está disponible, si no, usa el editor del sistema
-if command -v code &>/dev/null; then
-  git config --global core.editor "code --wait"
-fi
+# 5‑c) Nota: ~/.gitconfig ahora se versiona con Stow (paquete git)
+#      Las identidades sensibles siguen en ~/.gitconfig-personal y ~/.gitconfig-trabajo.
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 6) Enlazar dotfiles con GNU Stow
 # ══════════════════════════════════════════════════════════════════════════════
 info "Enlazando dotfiles con GNU Stow..."
+
+# Respaldar archivos existentes que Stow va a reemplazar
+backup_local_file_if_needed "$HOME/.gitconfig"
+backup_local_file_if_needed "$HOME/.gitignore_global"
+backup_local_file_if_needed "$HOME/.gitattributes_global"
+backup_local_file_if_needed "$HOME/.config/fastfetch/config.jsonc"
+backup_local_file_if_needed "$HOME/.config/lazygit/config.yml"
+backup_local_file_if_needed "$HOME/.config/yazi/yazi.toml"
+backup_local_file_if_needed "$HOME/.config/atuin/config.toml"
+backup_local_file_if_needed "$HOME/.config/btop/btop.conf"
+backup_local_file_if_needed "$HOME/.config/bat/config"
+
 cd "$(dirname "$0")"
-stow -R zsh
+stow -R zsh fastfetch git lazygit yazi atuin btop bat bin
 cd - >/dev/null
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -282,11 +314,12 @@ fi
 # ══════════════════════════════════════════════════════════════════════════════
 info "── Herramientas CLI modernas (Cargo) ──"
 
-cargo_install eza   eza
-cargo_install bat   bat
-cargo_install fd    fd-find
-cargo_install xh    xh
-cargo_install dust  du-dust
+cargo_install eza eza
+cargo_install bat bat
+cargo_install fd fd-find
+cargo_install xh xh
+cargo_install dust du-dust
+cargo_install delta git-delta
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 13) Herramientas modernas vía scripts / binarios
@@ -335,15 +368,15 @@ fi
 # ── lazygit ───────────────────────────────────────────────────────────────────
 if ! command -v lazygit &>/dev/null; then
   info "Instalando lazygit (último release de GitHub)..."
-  LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" \
-    | jq -r '.tag_name' | sed 's/^v//')
+  LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" |
+    jq -r '.tag_name' | sed 's/^v//')
 
   if [[ -n "$LAZYGIT_VERSION" && "$LAZYGIT_VERSION" != "null" ]]; then
     LAZYGIT_ARCHIVE="lazygit_${LAZYGIT_VERSION}_Linux_${ARCH}.tar.gz"
     LAZYGIT_URL="https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/${LAZYGIT_ARCHIVE}"
     TMP_DIR=$(mktemp -d)
-    if curl -Lo "${TMP_DIR}/${LAZYGIT_ARCHIVE}" "$LAZYGIT_URL" && \
-       tar xzf "${TMP_DIR}/${LAZYGIT_ARCHIVE}" -C "$TMP_DIR" lazygit; then
+    if curl -Lo "${TMP_DIR}/${LAZYGIT_ARCHIVE}" "$LAZYGIT_URL" &&
+      tar xzf "${TMP_DIR}/${LAZYGIT_ARCHIVE}" -C "$TMP_DIR" lazygit; then
       install "${TMP_DIR}/lazygit" "$LOCAL_BIN/lazygit"
       info "lazygit v${LAZYGIT_VERSION} instalado en $LOCAL_BIN."
     else
@@ -360,15 +393,15 @@ fi
 # ── yazi (prebuilt binary desde GitHub) ───────────────────────────────────────
 if ! command -v yazi &>/dev/null; then
   info "Instalando yazi (último release de GitHub)..."
-  YAZI_VERSION=$(curl -s "https://api.github.com/repos/sxyazi/yazi/releases/latest" \
-    | jq -r '.tag_name' | sed 's/^v//')
+  YAZI_VERSION=$(curl -s "https://api.github.com/repos/sxyazi/yazi/releases/latest" |
+    jq -r '.tag_name' | sed 's/^v//')
 
   if [[ -n "$YAZI_VERSION" && "$YAZI_VERSION" != "null" ]]; then
     YAZI_ARCHIVE="yazi-${ARCH}-unknown-linux-gnu.zip"
     YAZI_URL="https://github.com/sxyazi/yazi/releases/download/v${YAZI_VERSION}/${YAZI_ARCHIVE}"
     TMP_DIR=$(mktemp -d)
-    if curl -Lo "${TMP_DIR}/${YAZI_ARCHIVE}" "$YAZI_URL" && \
-       unzip -qo "${TMP_DIR}/${YAZI_ARCHIVE}" -d "$TMP_DIR"; then
+    if curl -Lo "${TMP_DIR}/${YAZI_ARCHIVE}" "$YAZI_URL" &&
+      unzip -qo "${TMP_DIR}/${YAZI_ARCHIVE}" -d "$TMP_DIR"; then
       install "${TMP_DIR}/yazi-${ARCH}-unknown-linux-gnu/yazi" "$LOCAL_BIN/yazi"
       install "${TMP_DIR}/yazi-${ARCH}-unknown-linux-gnu/ya" "$LOCAL_BIN/ya"
       info "yazi v${YAZI_VERSION} instalado en $LOCAL_BIN."
@@ -419,7 +452,7 @@ if [[ -f "$HOME/.gitconfig-trabajo" ]]; then
   echo ""
 fi
 echo -e "${GREEN}Verificando herramientas instaladas:${NC}"
-for cmd in eza bat fd xh dust rg fzf zoxide atuin lazygit yazi fastfetch duf btop tldr jq rustc fnm node uv opencode; do
+for cmd in eza bat fd xh dust delta rg fzf zoxide atuin lazygit yazi fastfetch duf btop tldr jq rustc fnm node uv opencode; do
   printf "    %-12s" "$cmd"
   if command -v "$cmd" &>/dev/null; then
     echo -e "${GREEN}✅${NC} $($cmd --version 2>&1 | head -1)"
