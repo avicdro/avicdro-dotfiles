@@ -222,7 +222,7 @@ backup_local_file_if_needed "$HOME/.config/btop/btop.conf"
 backup_local_file_if_needed "$HOME/.config/bat/config"
 
 cd "$(dirname "$0")"
-stow -R zsh fastfetch git lazygit yazi atuin btop bat bin
+stow -R zsh fastfetch git lazygit yazi atuin btop bat bin ai-agents
 cd - >/dev/null
 
 # ══════════════════════════════════════════════════════════════════════════════
