@@ -32,3 +32,9 @@ fi
 
 # ── rsync seguro (copia con progreso) ─────────────────────────────────────────
 alias cpg="rsync -ah --progress"
+
+# ── herdr ──────────────────────────────────────────────────────────────────────
+alias h='herdr'
+
+# ── opencode (modo yolo) ──────────────────────────────────────────────────────
+alias op='opencode --yolo'

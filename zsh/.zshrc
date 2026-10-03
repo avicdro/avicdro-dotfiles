@@ -27,6 +27,13 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# ── fpath sanitization ────────────────────────────────────────────────────────
+# Excluir completions rotas (symlinks apuntando a destinos inexistentes).
+# Docker Desktop WSL deja un symlink roto cuando no está montado.
+if [[ -L /usr/share/zsh/vendor-completions/_docker && ! -e /usr/share/zsh/vendor-completions/_docker ]]; then
+  fpath=(${fpath:#/usr/share/zsh/vendor-completions})
+fi
+
 # ── Oh My Zsh ─────────────────────────────────────────────────────────────────
 # Plugins estándar en $ZSH/plugins/, custom en $ZSH/custom/plugins/.
 # El plugin "git" provee ~150 aliases (ga, gc, gp, gst, gl, etc.).
@@ -48,3 +55,13 @@ for module in "$HOME/.zsh/"*.zsh(N); do
   source "$module"
 done
 export PATH="$HOME/.config/symfony-cli/bin:$PATH"
+
+# opencode
+export PATH="$HOME/.opencode/bin:$PATH"
+
+# Obsidian via Wayland nativo (fix offset fullscreen en WSLg, 2026-08-31)
+alias obsidian="/usr/bin/obsidian --ozone-platform=wayland"
+
+# Added by stepwise installer
+export PATH="$HOME/.stepwise/bin:$PATH"
+export CODA_SINGLE_AGENT_MAX_ITERATIONS=200
