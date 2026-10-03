@@ -1,6 +1,12 @@
 # Configuración global versionada en dotfiles (GNU Stow)
 # Identidades sensibles separadas en ~/.gitconfig-personal y ~/.gitconfig-trabajo
 
+# Identidad por defecto (noreply de GitHub). Debe ir ANTES de los includeIf
+# para que las identidades por directorio la sobreescriban.
+[user]
+    name = avicdro
+    email = 18623561+avicdro@users.noreply.github.com
+
 [includeIf "gitdir:~/code/personal/"]
     path = ~/.gitconfig-personal
 
@@ -10,7 +16,7 @@
 [core]
     excludesfile = ~/.gitignore_global
     attributesfile = ~/.gitattributes_global
-    autocrlf = input
+    autocrlf = false
 
 [init]
     defaultBranch = main
