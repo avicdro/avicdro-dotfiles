@@ -124,6 +124,43 @@ Su configuración queda versionada en `fastfetch/.config/fastfetch/config.jsonc`
 
 También se versionan en paquetes separados de Stow las configuraciones base de `git`, `lazygit`, `yazi`, `atuin`, `btop`, `bat` y `~/.local/bin`.
 
+## IA — Skills y herramientas de documentos
+
+Todo lo relativo a IA vive en el paquete Stow `ai-agents`:
+
+| Ruta versionada | Qué es |
+|-----------------|--------|
+| `.config/opencode/AGENTS.md` | Instrucciones globales para el agente de opencode |
+| `.config/opencode/agents/` | Subagents dev-flow (planner/builder/reviewer) |
+| `.config/opencode/plugins/` | Plugins JS (herdr-agent-state, sidekick-capture) |
+| `.config/opencode/opencode.json` | Config global: MCPs, permisos, agents |
+| `.config/opencode/package.json` + `bun.lock` | Deps de los plugins |
+| `.agents/skills/convert-documents-to-markdown` | Skill: documentos → Markdown con anydoc |
+| `.agents/skills/prompt-optimize` | Skill: optimización de prompts |
+| `.agents/.skill-lock.json` | Registro del ecosistema skills.sh |
+
+**Skills multi-harness**: el directorio canónico es `~/.agents/skills/` (estándar
+agentskills/skills.sh, lo leen opencode, Claude Code, Codex, Cursor…). `install.sh`
+crea los symlinks en `~/.claude/skills/` para harnesses que usan esa ruta. Las skills
+de terceros (`find-skills`, `herdr`, `rust`) no se vendorizan: reinstálalas con
+`npx skills add <origen>` según `.skill-lock.json`, y quedará enlazada su copia.
+
+### anydoc — conversión de documentos a Markdown
+
+[anydoc](https://github.com/firecrawl/anydoc) (instalado con `npm install -g @firecrawl/anydoc`)
+convierte Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV y PDF a GitHub-Flavored
+Markdown en milisegundos. 100% local: la conversión no hace ninguna llamada de red.
+Uso: `anydoc report.docx`, `anydoc scan.pdf -o scan.md`, `anydoc - --format csv < f`.
+
+### OCR local — PDFs escaneados
+
+La cadena completa está documentada en la skill `convert-documents-to-markdown`
+(ningún servicio externo):
+
+1. `pdftoppm` (poppler-utils) rasteriza las páginas del PDF
+2. El modelo multimodal del agente transcribe, o `gemma4:cloud` vía el daemon de ollama
+3. Último recurso offline: `glm-ocr:q8_0` vía ollama (multilenguaje, especializado en documentos; necesita VRAM libre para ir rápido) o `tesseract` (apt, mínima huella)
+
 ## Verificar instalación
 
 Ejecuta este one-liner para comprobar que todas las herramientas están disponibles:

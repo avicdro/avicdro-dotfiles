@@ -433,6 +433,72 @@ else
 fi
 
 # ══════════════════════════════════════════════════════════════════════════════
+# 14) Herramientas IA
+# ══════════════════════════════════════════════════════════════════════════════
+info "── Herramientas IA ──"
+
+# ── anydoc: documentos (doc/docx/ppt/xlsx/odt/rtf/epub/pdf/csv) → Markdown ───
+if ! command -v anydoc &>/dev/null; then
+  if command -v npm &>/dev/null; then
+    info "Instalando anydoc (conversión de documentos a Markdown)..."
+    if npm install -g @firecrawl/anydoc; then
+      info "anydoc $(anydoc --version 2>/dev/null) instalado."
+    else
+      fail "Error instalando anydoc. Continuando..."
+    fi
+  else
+    warn "npm no disponible — no se puede instalar anydoc. Instala Node.js primero."
+  fi
+else
+  info "anydoc ya instalado — omitiendo."
+fi
+
+# ── OCR local: rasterizado (poppler) + tesseract ─────────────────────────────
+if ! command -v pdftoppm &>/dev/null || ! command -v tesseract &>/dev/null; then
+  info "Instalando OCR local (poppler-utils + tesseract + idioma español)..."
+  if sudo apt install -y poppler-utils tesseract-ocr tesseract-ocr-spa; then
+    info "OCR local instalado (pdftoppm + tesseract)."
+  else
+    fail "Error instalando OCR local. Continuando..."
+  fi
+else
+  info "OCR local ya instalado — omitiendo."
+fi
+
+# ── ollama (modelos locales y cloud) + modelo OCR ─────────────────────────────
+if ! command -v ollama &>/dev/null; then
+  info "Instalando ollama..."
+  if curl -fsSL https://ollama.com/install.sh | sh; then
+    info "Ollama instalado."
+  else
+    fail "Error instalando ollama. Continuando..."
+  fi
+else
+  info "Ollama ya instalado — omitiendo."
+fi
+if command -v ollama &>/dev/null && ! ollama list 2>/dev/null | grep -q 'glm-ocr:q8_0'; then
+  info "Descargando modelo OCR glm-ocr:q8_0 (1.6 GB, local, multilenguaje)..."
+  if ollama pull glm-ocr:q8_0; then
+    info "glm-ocr:q8_0 listo."
+  else
+    fail "Error descargando glm-ocr. Continuando..."
+  fi
+fi
+
+# ── Skills multi-harness: enlazar ~/.agents/skills en ~/.claude/skills ────────
+if [[ -d "$HOME/.agents/skills" ]]; then
+  info "Enlazando skills en ~/.claude/skills (cross-harness)..."
+  for skill_dir in "$HOME"/.agents/skills/*/; do
+    name="$(basename "$skill_dir")"
+    target="$HOME/.claude/skills/$name"
+    if [[ ! -e "$target" && ! -L "$target" ]]; then
+      ln -s "$skill_dir" "$target"
+      info "Enlazado: ~/.claude/skills/$name"
+    fi
+  done
+fi
+
+# ══════════════════════════════════════════════════════════════════════════════
 # 15) Mensaje final
 # ══════════════════════════════════════════════════════════════════════════════
 echo ""
