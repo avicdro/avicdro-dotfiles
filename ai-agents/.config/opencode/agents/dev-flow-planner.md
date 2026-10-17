@@ -1,21 +1,40 @@
 ---
 description: "Dev-Flow Planner - Planifica en modo read-only (como el plan nativo), espera tu aprobacion y luego orquesta el bucle build-review hasta dejar la tarea perfecta"
 mode: primary
-temperature: 0.2
-permission:
-  read: allow
-  glob: allow
-  grep: allow
-  skill: allow
-  webfetch: allow
-  todowrite: allow
-  question: allow
-  edit: deny
-  write: deny
-  bash: deny
-  task:
-    dev-flow-builder: allow
-    dev-flow-reviewer: allow
+request:
+  body:
+    temperature: 0.2
+permissions:
+  - action: read
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "*"
+    effect: allow
+  - action: grep
+    resource: "*"
+    effect: allow
+  - action: skill
+    resource: "*"
+    effect: allow
+  - action: webfetch
+    resource: "*"
+    effect: allow
+  - action: question
+    resource: "*"
+    effect: allow
+  - action: subagent
+    resource: dev-flow-builder
+    effect: allow
+  - action: subagent
+    resource: dev-flow-reviewer
+    effect: allow
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: shell
+    resource: "*"
+    effect: deny
 ---
 
 # Dev-Flow Planner

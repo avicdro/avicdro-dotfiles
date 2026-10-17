@@ -1,51 +1,59 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": [],
-  "permission": "allow",
+  "plugins": [],
+  "permissions": [
+    { "action": "*", "resource": "*", "effect": "allow" }
+  ],
   "mcp": {
-    "notion": {
-      "type": "local",
-      "command": ["npx", "-y", "mcp-remote", "https://mcp.notion.com/mcp"],
-      "enabled": false
-    },
-    "pencil": {
-      "type": "local",
-      "command": [
-        "/mnt/c/Users/avicd/AppData/Local/Programs/Pencil/resources/app.asar.unpacked/out/mcp-server-windows-x64.exe",
-        "--app",
-        "desktop"
-      ],
-      "environment": {},
-      "enabled": true
+    "servers": {
+      "reactbits": {
+        "type": "local",
+        "command": ["npx", "-y", "shadcn@latest", "mcp"],
+        "disabled": true
+      },
+      "notion": {
+        "type": "local",
+        "command": ["npx", "-y", "mcp-remote", "https://mcp.notion.com/mcp"],
+        "disabled": true
+      },
+      "pencil": {
+        "type": "local",
+        "command": [
+          "/mnt/c/Users/avicd/AppData/Local/Programs/Pencil/resources/app.asar.unpacked/out/mcp-server-windows-x64.exe",
+          "--app",
+          "desktop"
+        ],
+        "environment": {},
+        "disabled": true
+      }
     }
   },
-  "agent": {
+  "agents": {
     "dev-flow-planner": {
       "description": "Dev-Flow Planner - Planifica en read-only, espera tu aprobacion y orquesta el bucle build-review",
       "mode": "primary",
-      "prompt": "{file:~/.config/opencode/agents/dev-flow-planner.md}",
+      "system": "{file:~/.config/opencode/agents/dev-flow-planner.md}",
       "color": "#fabd2f",
-      "temperature": 0.2,
-      "maxSteps": 150,
-      "permission": {
-        "task": {
-          "dev-flow-builder": "allow",
-          "dev-flow-reviewer": "allow"
-        },
-        "skill": "allow",
-        "read": "allow",
-        "edit": "deny",
-        "write": "deny",
-        "bash": "deny"
-      }
+      "request": {
+        "body": { "temperature": 0.2 }
+      },
+      "steps": 150,
+      "permissions": [
+        { "action": "read", "resource": "*", "effect": "allow" },
+        { "action": "skill", "resource": "*", "effect": "allow" },
+        { "action": "subagent", "resource": "dev-flow-builder", "effect": "allow" },
+        { "action": "subagent", "resource": "dev-flow-reviewer", "effect": "allow" },
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" }
+      ]
     },
     "dev-flow-builder": {
       "mode": "subagent",
-      "prompt": "{file:~/.config/opencode/agents/dev-flow-builder.md}"
+      "system": "{file:~/.config/opencode/agents/dev-flow-builder.md}"
     },
     "dev-flow-reviewer": {
       "mode": "subagent",
-      "prompt": "{file:~/.config/opencode/agents/dev-flow-reviewer.md}"
+      "system": "{file:~/.config/opencode/agents/dev-flow-reviewer.md}"
     }
   }
 }

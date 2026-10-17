@@ -58,6 +58,8 @@ export PATH="$HOME/.config/symfony-cli/bin:$PATH"
 
 # opencode
 export PATH="$HOME/.opencode/bin:$PATH"
+# (las vars OPENTUI_IMAGE_PROTOCOL / OPENTUI_GRAPHICS viven en ~/.zshenv,
+# para que tambien las hereden los shells no-interactivos de herdr)
 
 # Obsidian via Wayland nativo (fix offset fullscreen en WSLg, 2026-08-31)
 alias obsidian="/usr/bin/obsidian --ozone-platform=wayland"

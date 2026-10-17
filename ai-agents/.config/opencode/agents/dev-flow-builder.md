@@ -2,17 +2,34 @@
 description: "Dev-Flow Builder - Implementa el plan aprobado con auto-correccion (3 intentos) y validacion continua. Detecta el stack en runtime"
 mode: subagent
 model: ollama-cloud/glm-5.3-flash
-temperature: 0.1
-permission:
-  read: allow
-  edit: allow
-  write: allow
-  glob: allow
-  grep: allow
-  skill: allow
-  bash: allow
-  task: deny
-  webfetch: deny
+request:
+  body:
+    temperature: 0.1
+permissions:
+  - action: read
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "*"
+    effect: allow
+  - action: grep
+    resource: "*"
+    effect: allow
+  - action: skill
+    resource: "*"
+    effect: allow
+  - action: shell
+    resource: "*"
+    effect: allow
+  - action: edit
+    resource: "*"
+    effect: allow
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: webfetch
+    resource: "*"
+    effect: deny
 ---
 
 # Dev-Flow Builder

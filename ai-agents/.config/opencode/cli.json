@@ -1,0 +1,26 @@
+{
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "plugins": [
+    { "package": "./herdr-tui-session.js" }
+  ],
+  "theme": {
+    "name": "gruvbox-glass",
+    "mode": "dark"
+  },
+  "diffs": {
+    "wrap": "word",
+    "fullscreen": true,
+    "single": false,
+    "tree": true
+  },
+  "session": {
+    "sidebar": "hide",
+    "scrollbar": false,
+    "thinking": "show",
+    "image_preview": false
+  },
+  "animations": true,
+  "prompt": {
+    "image_preview": true
+  }
+}

@@ -2,17 +2,34 @@
 description: "Dev-Flow Reviewer - Validacion funcional + revision de calidad (QA y review fusionados). Score unico >= 85, feedback exacto archivo:linea, sin permiso de editar"
 mode: subagent
 model: ollama-cloud/glm-5.3-flash
-temperature: 0.15
-permission:
-  read: allow
-  glob: allow
-  grep: allow
-  skill: allow
-  bash: allow
-  edit: deny
-  write: deny
-  task: deny
-  webfetch: deny
+request:
+  body:
+    temperature: 0.15
+permissions:
+  - action: read
+    resource: "*"
+    effect: allow
+  - action: glob
+    resource: "*"
+    effect: allow
+  - action: grep
+    resource: "*"
+    effect: allow
+  - action: skill
+    resource: "*"
+    effect: allow
+  - action: shell
+    resource: "*"
+    effect: allow
+  - action: edit
+    resource: "*"
+    effect: deny
+  - action: subagent
+    resource: "*"
+    effect: deny
+  - action: webfetch
+    resource: "*"
+    effect: deny
 ---
 
 # Dev-Flow Reviewer
